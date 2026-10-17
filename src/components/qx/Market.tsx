@@ -44,8 +44,8 @@ export function useCountdown() {
 
 export function Market() {
   const { t } = useLang();
-  const [pair, setPair] = useState(PAIRS[3]);
-  const [candles, setCandles] = useState<Candle[]>(() => seed(PAIRS[3].base));
+  const [pair, setPair] = useState(PAIRS[3]!);
+  const [candles, setCandles] = useState<Candle[]>(() => seed(PAIRS[3]!.base));
   const secs = useCountdown();
   const lastSec = useRef(secs);
 

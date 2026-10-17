@@ -11,7 +11,7 @@ export const isToday = (iso: string) => new Date(iso).toDateString() === new Dat
 
 export function Journal({ trades, setTrades }: { trades: Trade[]; setTrades: (t: Trade[]) => void }) {
   const { t, lang } = useLang();
-  const [pair, setPair] = useState(PAIRS[3].id), [amount, setAmount] = useState(10), [payout, setPayout] = useState(85), [note, setNote] = useState(""), [shot, setShot] = useState<string>();
+  const [pair, setPair] = useState(PAIRS[3]!.id), [amount, setAmount] = useState(10), [payout, setPayout] = useState(85), [note, setNote] = useState(""), [shot, setShot] = useState<string>();
   const [coach, setCoach] = useState<CoachResult | null>(null), [busy, setBusy] = useState(false), [err, setErr] = useState<string | null>(null);
 
   const log = (dir: "CALL" | "PUT", result: "WIN" | "LOSS") => {
