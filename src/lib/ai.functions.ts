@@ -4,7 +4,7 @@ import { z } from "zod";
 const MODEL = "openai/gpt-6-astra";
 
 async function streamResponses(body: Record<string, unknown>): Promise<string> {
-  const key = process.env.LOVABLE_API_KEY;
+  const key = process.env["LOVABLE_API_KEY"];
   if (!key) throw new Error("AI is not configured (missing key).");
   const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
     method: "POST",

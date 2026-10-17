@@ -4,7 +4,7 @@ import { PAIRS } from "./Market";
 import { coachTrades, type CoachResult } from "@/lib/ai.functions";
 import { Loader2, Trash2, Brain } from "lucide-react";
 
-export type Trade = { id: string; time: string; pair: string; dir: "CALL" | "PUT"; amount: number; payout: number; result: "WIN" | "LOSS"; note?: string; shot?: string };
+export type Trade = { id: string; time: string; pair: string; dir: "CALL" | "PUT"; amount: number; payout: number; result: "WIN" | "LOSS"; note?: string | undefined; shot?: string | undefined };
 
 export const pnl = (t: Trade) => (t.result === "WIN" ? (t.amount * t.payout) / 100 : -t.amount);
 export const isToday = (iso: string) => new Date(iso).toDateString() === new Date().toDateString();
@@ -23,7 +23,7 @@ export function Journal({ trades, setTrades }: { trades: Trade[]; setTrades: (t:
   let streak = 0, maxW = 0, maxL = 0, cw = 0, cl = 0;
   [...today].reverse().forEach((x) => { if (x.result === "WIN") { cw++; cl = 0; } else { cl++; cw = 0; } maxW = Math.max(maxW, cw); maxL = Math.max(maxL, cl); });
   if (today[0]) { const r = today[0].result; for (const x of today) { if (x.result !== r) break; streak++; } }
-  const byPair = Object.entries(trades.reduce<Record<string, { w: number; n: number }>>((a, x) => { a[x.pair] ??= { w: 0, n: 0 }; a[x.pair].n++; if (x.result === "WIN") a[x.pair].w++; return a; }, {})).sort((a, b) => b[1].w / b[1].n - a[1].w / a[1].n).slice(0, 3);
+  const byPair = Object.entries(trades.reduce<Record<string, { w: number; n: number }>>((a, x) => { const e = (a[x.pair] ??= { w: 0, n: 0 }); e.n++; if (x.result === "WIN") e.w++; return a; }, {})).sort((a, b) => b[1].w / b[1].n - a[1].w / a[1].n).slice(0, 3);
 
   const runCoach = async () => {
     setBusy(true); setErr(null);

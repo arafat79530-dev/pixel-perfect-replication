@@ -12,7 +12,7 @@ type Candle = { o: number; h: number; l: number; c: number };
 function seed(base: number, n = 60): Candle[] {
   const out: Candle[] = [];
   let p = base;
-  for (let i = 0; i < n; i++) out.push(next(p, base)), (p = out[i].c);
+  for (let i = 0; i < n; i++) out.push(next(p, base)), (p = out[i]!.c);
   return out;
 }
 function next(p: number, base: number): Candle {
@@ -24,12 +24,12 @@ function next(p: number, base: number): Candle {
 const sma = (a: number[], n: number) => a.slice(-n).reduce((s, x) => s + x, 0) / Math.min(n, a.length);
 function rsi(c: number[], n = 7) {
   let g = 0, l = 0;
-  for (let i = c.length - n; i < c.length; i++) { const d = c[i] - c[i - 1]; d > 0 ? (g += d) : (l -= d); }
+  for (let i = c.length - n; i < c.length; i++) { const d = c[i]! - c[i - 1]!; d > 0 ? (g += d) : (l -= d); }
   return l === 0 ? 100 : 100 - 100 / (1 + g / l);
 }
 function stoch(cs: Candle[], n = 5) {
   const s = cs.slice(-n); const hi = Math.max(...s.map((x) => x.h)); const lo = Math.min(...s.map((x) => x.l));
-  return hi === lo ? 50 : ((cs[cs.length - 1].c - lo) / (hi - lo)) * 100;
+  return hi === lo ? 50 : ((cs[cs.length - 1]!.c - lo) / (hi - lo)) * 100;
 }
 function boll(c: number[], n = 20) {
   const s = c.slice(-n); const m = sma(s, n); const sd = Math.sqrt(s.reduce((a, x) => a + (x - m) ** 2, 0) / n);
@@ -53,7 +53,7 @@ export function Market() {
   useEffect(() => {
     const id = setInterval(() => {
       setCandles((cs) => {
-        const cur = { ...cs[cs.length - 1] };
+        const cur = { ...cs[cs.length - 1]! };
         const v = pair.base * 0.00012;
         cur.c += (Math.random() - 0.5) * v * 2;
         cur.h = Math.max(cur.h, cur.c); cur.l = Math.min(cur.l, cur.c);
@@ -63,14 +63,14 @@ export function Market() {
     return () => clearInterval(id);
   }, [pair]);
   useEffect(() => {
-    if (secs > lastSec.current) setCandles((cs) => [...cs.slice(-59), { ...next(cs[cs.length - 1].c, pair.base), h: cs[cs.length - 1].c, l: cs[cs.length - 1].c, c: cs[cs.length - 1].c, o: cs[cs.length - 1].c }]);
+    if (secs > lastSec.current) setCandles((cs) => { const c = cs[cs.length - 1]!.c; return [...cs.slice(-59), { o: c, h: c, l: c, c }]; });
     lastSec.current = secs;
   }, [secs, pair]);
 
   const ind = useMemo(() => {
     const c = candles.map((x) => x.c);
     const r = rsi(c), st = stoch(candles), b = boll(c);
-    const ma5 = sma(c, 5), ma20 = sma(c, 20), last = c[c.length - 1];
+    const ma5 = sma(c, 5), ma20 = sma(c, 20), last = c[c.length - 1]!;
     let score = 0;
     score += r < 30 ? 1 : r > 70 ? -1 : 0;
     score += st < 20 ? 1 : st > 80 ? -1 : 0;
@@ -89,7 +89,7 @@ export function Market() {
     SC: ["Strong Call", "শক্তিশালী কল", "text-call"], C: ["Call", "কল", "text-call"], N: ["Neutral", "নিরপেক্ষ", "text-muted-foreground"],
     P: ["Put", "পুট", "text-put"], SP: ["Strong Put", "শক্তিশালী পুট", "text-put"],
   };
-  const cc = cons[ind.consensus];
+  const cc = cons[ind.consensus]!;
 
   return (
     <div className="space-y-4">
