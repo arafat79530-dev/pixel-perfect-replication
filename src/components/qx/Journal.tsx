@@ -3,6 +3,7 @@ import { useLang } from "@/lib/i18n";
 import { PAIRS } from "./Market";
 import { coachTrades, type CoachResult } from "@/lib/ai.functions";
 import { Loader2, Trash2, Brain } from "lucide-react";
+import { useServerFn } from '@tanstack/react-start';
 
 export type Trade = { id: string; time: string; pair: string; dir: "CALL" | "PUT"; amount: number; payout: number; result: "WIN" | "LOSS"; note?: string | undefined; shot?: string | undefined };
 
@@ -10,8 +11,9 @@ export const pnl = (t: Trade) => (t.result === "WIN" ? (t.amount * t.payout) / 1
 export const isToday = (iso: string) => new Date(iso).toDateString() === new Date().toDateString();
 
 export function Journal({ trades, setTrades }: { trades: Trade[]; setTrades: (t: Trade[]) => void }) {
+  const coachFn = useServerFn(coachTrades);
   const { t, lang } = useLang();
-  const [pair, setPair] = useState(PAIRS[3]!.id), [amount, setAmount] = useState(10), [payout, setPayout] = useState(85), [note, setNote] = useState(""), [shot, setShot] = useState<string>();
+  const [pair, setPair] = useState(PAIRS[3]?.id ?? 'EUR/USD'), [amount, setAmount] = useState(10), [payout, setPayout] = useState(85), [note, setNote] = useState(""), [shot, setShot] = useState<string>();
   const [coach, setCoach] = useState<CoachResult | null>(null), [busy, setBusy] = useState(false), [err, setErr] = useState<string | null>(null);
 
   const log = (dir: "CALL" | "PUT", result: "WIN" | "LOSS") => {
@@ -27,7 +29,7 @@ export function Journal({ trades, setTrades }: { trades: Trade[]; setTrades: (t:
 
   const runCoach = async () => {
     setBusy(true); setErr(null);
-    try { setCoach(await coachTrades({ data: { trades: trades.slice(0, 200).map(({ shot: _s, id: _i, ...r }) => r) } })); }
+    try { setCoach(await coachFn({ data: { trades: trades.slice(0, 200).map(({ shot: _s, id: _i, ...r }) => r) } })); }
     catch (e) { setErr(e instanceof Error ? e.message : "Error"); } finally { setBusy(false); }
   };
 
