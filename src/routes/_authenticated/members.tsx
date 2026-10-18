@@ -1,0 +1,18 @@
+import { createFileRoute, Link, redirect } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { SignOutButton } from '@/components/qx/SignOutButton';
+import { ArrowLeft, Check, X, Ban, RefreshCw } from 'lucide-react';
+export const Route = createFileRoute('/_authenticated/members')({
+  beforeLoad: ({ context }) => { if (!context.isAdmin) throw redirect({ to: '/terminal' }); },
+  head: () => ({ meta: [{ title: 'Member Permissions — GHOST TRADER AI' }, { name: 'description', content: 'Owner controls for GHOST TRADER AI membership approval.' }, { property: 'og:title', content: 'Member Permissions — GHOST TRADER AI' }, { property: 'og:description', content: 'Private owner access management.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }),
+  component: Members,
+});
+function Members() {
+  const { userId } = Route.useRouteContext(); const [error, setError] = useState(''), [busy, setBusy] = useState<string | null>(null);
+  const members = useQuery({ queryKey: ['members'], queryFn: async () => { const { data, error } = await supabase.from('profiles').select('id, display_name, email, created_at, memberships(status)').order('created_at', { ascending: false }); if (error) throw error; return data; } });
+  const decide = async (id: string, status: string) => { setBusy(id); setError(''); const { error } = await supabase.rpc('decide_access', { target_user: id, new_status: status }); if (error) setError(error.message); else await members.refetch(); setBusy(null); };
+  return <main className="mx-auto max-w-5xl space-y-6 px-4 py-8"><header className="flex flex-wrap items-center justify-between gap-4"><div><h1 className="text-2xl font-bold">GHOST TRADER AI</h1><h2 className="mt-2 text-primary">Member permissions / সদস্যের অনুমতি</h2></div><SignOutButton /></header><div className="flex justify-between"><Button variant="outline" asChild><Link to="/terminal"><ArrowLeft /> Terminal</Link></Button><Button variant="ghost" size="icon" aria-label="Refresh members" onClick={() => members.refetch()}><RefreshCw /></Button></div>{(error || members.error) && <p role="alert" className="text-put">{error || members.error?.message}</p>}{members.isPending && <p>Loading…</p>}<div className="divide-y border-y">{members.data?.map(m => <div key={m.id} className="flex flex-wrap items-center justify-between gap-4 py-5"><div className="min-w-0"><h3 className="font-bold">{m.display_name || 'Member'}</h3><p className="break-all text-sm text-muted-foreground">{m.email}</p><p className="mt-1 text-xs text-warn">{m.id === userId ? 'Owner / মালিক' : m.memberships?.status}</p></div>{m.id !== userId && <div className="flex flex-wrap gap-2">{m.memberships?.status !== 'approved' && <Button size="sm" disabled={busy === m.id} onClick={() => decide(m.id, 'approved')}><Check /> Approve</Button>}{m.memberships?.status === 'pending' && <Button variant="outline" size="sm" disabled={busy === m.id} onClick={() => decide(m.id, 'rejected')}><X /> Reject</Button>}{m.memberships?.status === 'approved' && <Button variant="destructive" size="sm" disabled={busy === m.id} onClick={() => { if (window.confirm('Revoke this member’s access?')) void decide(m.id, 'revoked'); }}><Ban /> Revoke</Button>}</div>}</div>)}</div></main>;
+}
