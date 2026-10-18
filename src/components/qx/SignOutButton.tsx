@@ -9,6 +9,7 @@ export function SignOutButton() {
     await cache.cancelQueries(); cache.clear();
     const { error } = await supabase.auth.signOut();
     if (error) { window.alert(error.message); return; }
+    cache.setQueryData(['account-access'], null);
     await navigate({ to: '/auth', replace: true });
   }}><LogOut /></Button>;
 }
