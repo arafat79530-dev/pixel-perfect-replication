@@ -1,0 +1,7 @@
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { Button } from '@/components/ui/button';
+import { Ghost, ShieldCheck } from 'lucide-react';
+export const Route = createFileRoute('/')({
+  head: () => ({ meta: [ { title: 'GHOST TRADER AI — Member Access' }, { name: 'description', content: 'Secure member access to GHOST TRADER AI chart analysis and trading tools.' }, { property: 'og:title', content: 'GHOST TRADER AI — Member Access' }, { property: 'og:description', content: 'Owner-approved access to bilingual chart analysis and trading tools.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' } ] }),
+  component: () => <div className="mx-auto flex min-h-screen max-w-xl flex-col justify-center gap-6 px-6 py-16"><Ghost className="size-14 text-primary" /><h1 className="text-4xl font-bold">GHOST TRADER <span className="text-primary">AI</span></h1><p className="text-muted-foreground">Private trading terminal · অনুমোদিত সদস্যদের জন্য</p><Button size="lg" asChild><Link to="/auth"><ShieldCheck /> Login / Sign up</Link></Button><p className="text-xs text-warn">Binary options are high risk. AI analysis is not a guarantee.</p></div>,
+});
