@@ -5,6 +5,7 @@ import { useCountdown } from "./Market";
 import { Upload, Loader2, ScanLine } from "lucide-react";
 import { useServerFn } from '@tanstack/react-start';
 import { Button } from '@/components/ui/button';
+import { connectTelegram } from '@/lib/telegram.functions';
 
 export function beep(up: boolean) {
   try {
@@ -16,6 +17,8 @@ export function beep(up: boolean) {
 
 export function Scanner({ sound }: { sound: boolean }) {
   const analyze = useServerFn(analyzeChart);
+  const connect = useServerFn(connectTelegram);
+  const [telegramUrl, setTelegramUrl] = useState<string | null>(null);
   const { t, lang } = useLang();
   const [img, setImg] = useState<string | null>(null);
   const [res, setRes] = useState<ChartSignal | null>(null);
@@ -43,10 +46,14 @@ export function Scanner({ sound }: { sound: boolean }) {
   };
 
   const tone = res?.signal === "CALL" ? "text-call border-call glow-call" : res?.signal === "PUT" ? "text-put border-put glow-put" : "text-warn border-warn";
-  const label = res ? (res.signal === "CALL" ? t("CALL ▲", "কল ▲") : res.signal === "PUT" ? t("PUT ▼", "পুট ▼") : t("WAIT / NO ENTRY", "অপেক্ষা / এন্ট্রি নয়")) : "";
+  const label = res ? (res.signal === "CALL" ? t("UP ▲", "উপরে ▲") : res.signal === "PUT" ? t("DOWN ▼", "নিচে ▼") : t("WAIT / NO ENTRY", "অপেক্ষা / এন্ট্রি নয়")) : "";
 
   return (
     <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <Button variant="outline" onClick={async () => { try { setTelegramUrl(await connect()); } catch (e) { setErr(e instanceof Error ? e.message : 'Telegram failed'); } }}>{t('Connect Telegram', 'Telegram সংযুক্ত করুন')}</Button>
+        {telegramUrl && <Button asChild><a href={telegramUrl} target="_blank" rel="noopener noreferrer">{t('Open Telegram bot', 'Telegram বট খুলুন')}</a></Button>}
+      </div>
       <label onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) load(f); }}
         className="glass flex min-h-48 cursor-pointer flex-col items-center justify-center gap-2 border-dashed p-4 text-center">
         {img ? <img src={img} alt="chart" className="max-h-72 rounded-md" /> : (<>

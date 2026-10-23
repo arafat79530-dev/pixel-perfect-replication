@@ -14,6 +14,21 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_access_pause: {
+        Row: {
+          id: boolean
+          message: string
+        }
+        Insert: {
+          id?: boolean
+          message: string
+        }
+        Update: {
+          id?: boolean
+          message?: string
+        }
+        Relationships: []
+      }
       memberships: {
         Row: {
           decided_at: string | null
@@ -64,6 +79,50 @@ export type Database = {
         }
         Relationships: []
       }
+      telegram_links: {
+        Row: {
+          chat_id: number | null
+          expires_at: string | null
+          token_hash: string | null
+          user_id: string
+        }
+        Insert: {
+          chat_id?: number | null
+          expires_at?: string | null
+          token_hash?: string | null
+          user_id: string
+        }
+        Update: {
+          chat_id?: number | null
+          expires_at?: string | null
+          token_hash?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "telegram_links_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      telegram_updates: {
+        Row: {
+          created_at: string
+          update_id: number
+        }
+        Insert: {
+          created_at?: string
+          update_id: number
+        }
+        Update: {
+          created_at?: string
+          update_id?: number
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -99,6 +158,12 @@ export type Database = {
         }
         Returns: boolean
       }
+      telegram_allowed: { Args: { target_chat: number }; Returns: boolean }
+      telegram_bind: {
+        Args: { target_chat: number; token: string }
+        Returns: boolean
+      }
+      telegram_create_link: { Args: never; Returns: string }
     }
     Enums: {
       app_role: "admin" | "user"

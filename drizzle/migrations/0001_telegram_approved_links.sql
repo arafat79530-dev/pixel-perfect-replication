@@ -1,0 +1,16 @@
+CREATE TABLE public.telegram_links (user_id uuid PRIMARY KEY REFERENCES public.profiles(id) ON DELETE CASCADE, token_hash text UNIQUE, expires_at timestamptz, chat_id bigint UNIQUE);
+GRANT SELECT ON public.telegram_links TO authenticated; GRANT ALL ON public.telegram_links TO service_role;
+ALTER TABLE public.telegram_links ENABLE ROW LEVEL SECURITY;
+CREATE POLICY own_telegram_link ON public.telegram_links FOR SELECT TO authenticated USING (user_id=auth.uid() AND public.can_use_app());
+CREATE TABLE public.telegram_updates (update_id bigint PRIMARY KEY, created_at timestamptz NOT NULL DEFAULT now());
+GRANT ALL ON public.telegram_updates TO service_role;
+ALTER TABLE public.telegram_updates ENABLE ROW LEVEL SECURITY;
+CREATE TABLE public.ai_access_pause (id boolean PRIMARY KEY DEFAULT true CHECK(id), message text NOT NULL);
+GRANT ALL ON public.ai_access_pause TO service_role;
+ALTER TABLE public.ai_access_pause ENABLE ROW LEVEL SECURITY;
+CREATE FUNCTION public.telegram_create_link() RETURNS text LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ DECLARE token text; BEGIN IF NOT public.can_use_app() THEN RAISE EXCEPTION 'Owner approval required'; END IF; token := replace(gen_random_uuid()::text,'-','') || replace(gen_random_uuid()::text,'-',''); INSERT INTO public.telegram_links(user_id,token_hash,expires_at) VALUES(auth.uid(),md5(token),now()+interval '10 minutes') ON CONFLICT(user_id) DO UPDATE SET token_hash=md5(token),expires_at=now()+interval '10 minutes',chat_id=null; RETURN token; END $$;
+REVOKE ALL ON FUNCTION public.telegram_create_link() FROM PUBLIC,anon; GRANT EXECUTE ON FUNCTION public.telegram_create_link() TO authenticated;
+CREATE FUNCTION public.telegram_bind(token text, target_chat bigint) RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ BEGIN UPDATE public.telegram_links l SET chat_id=target_chat,token_hash=null,expires_at=null WHERE l.token_hash=md5(token) AND l.expires_at>now() AND EXISTS(SELECT 1 FROM public.memberships m WHERE m.user_id=l.user_id AND m.status='approved'); RETURN FOUND; END $$;
+REVOKE ALL ON FUNCTION public.telegram_bind(text,bigint) FROM PUBLIC,anon,authenticated; GRANT EXECUTE ON FUNCTION public.telegram_bind(text,bigint) TO service_role;
+CREATE FUNCTION public.telegram_allowed(target_chat bigint) RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$ SELECT EXISTS(SELECT 1 FROM public.telegram_links l JOIN public.memberships m ON m.user_id=l.user_id WHERE l.chat_id=target_chat AND m.status='approved') $$;
+REVOKE ALL ON FUNCTION public.telegram_allowed(bigint) FROM PUBLIC,anon,authenticated; GRANT EXECUTE ON FUNCTION public.telegram_allowed(bigint) TO service_role;
