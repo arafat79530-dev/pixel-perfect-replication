@@ -8,6 +8,13 @@
       "when": 1792307712415,
       "tag": "0000_owner_approval_access",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792767221287,
+      "tag": "0001_telegram_approved_links",
+      "breakpoints": true
     }
   ]
 }
