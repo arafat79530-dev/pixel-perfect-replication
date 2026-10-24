@@ -44,7 +44,8 @@ describe.skipIf(!url || !key || !publishable)('Live approval permissions', () =>
   });
   it('ordinary users cannot write approval state directly', async () => {
     const result = await member.from('memberships').update({ status: 'approved' }).eq('user_id', ids[0] ?? '');
-    expect(result.error).not.toBeNull();
+    expect((await member.from('memberships').select('status').eq('user_id', ids[0] ?? '').single()).data?.status).toBe('pending');
+    expect((await member.rpc('can_use_app')).data).toBe(false);
   });
   it('owner approval enables app access', async () => {
     expect((await owner.rpc('decide_access', { target_user: ids[0] ?? '', new_status: 'approved' })).error).toBeNull();
