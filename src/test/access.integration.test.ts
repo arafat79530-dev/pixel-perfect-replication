@@ -44,15 +44,27 @@ describe.skipIf(!url || !key || !publishable)('Live approval permissions', () =>
   });
   it('ordinary users cannot write approval state directly', async () => {
     const result = await member.from('memberships').update({ status: 'approved' }).eq('user_id', ids[0] ?? '');
-    expect(result.error).not.toBeNull();
+    expect((await member.from('memberships').select('status').eq('user_id', ids[0] ?? '').single()).data?.status).toBe('pending');
+    expect((await member.rpc('can_use_app')).data).toBe(false);
   });
   it('owner approval enables app access', async () => {
     expect((await owner.rpc('decide_access', { target_user: ids[0] ?? '', new_status: 'approved' })).error).toBeNull();
     expect((await member.rpc('can_use_app')).data).toBe(true);
   });
+  it('only approved accounts can link Telegram; tokens are single-use', async () => {
+    const link = await member.rpc('telegram_create_link');
+    expect(link.error).toBeNull();
+    expect(link.data).toHaveLength(64);
+    const token = link.data || '';
+    expect((await admin.rpc('telegram_bind', { token, target_chat: -900001 })).data).toBe(true);
+    expect((await admin.rpc('telegram_bind', { token, target_chat: -900002 })).data).toBe(false);
+    expect((await admin.rpc('telegram_allowed', { target_chat: -900001 })).data).toBe(true);
+  });
   it('owner revocation disables existing member sessions', async () => {
     expect((await owner.rpc('decide_access', { target_user: ids[0] ?? '', new_status: 'revoked' })).error).toBeNull();
     expect((await member.rpc('can_use_app')).data).toBe(false);
+    expect((await admin.rpc('telegram_allowed', { target_chat: -900001 })).data).toBe(false);
+    expect((await member.rpc('telegram_create_link')).error).not.toBeNull();
   });
   it('owner rejection disables member access', async () => {
     expect((await owner.rpc('decide_access', { target_user: ids[0] ?? '', new_status: 'rejected' })).error).toBeNull();
