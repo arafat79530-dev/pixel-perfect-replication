@@ -1,7 +1,8 @@
 # Tasks
-- [ ] Give more evidence-backed UP/DOWN signals while retaining WAIT for unreadable or conflicting charts.
-- [ ] Connect approved accounts to Telegram screenshot analysis and verify the webhook.
-- [ ] Rename app GHOST TRADER AI.
-- [ ] Add signup, login, recovery and owner approval controls.
-- [ ] Protect app and AI calls against unapproved users.
-- [ ] Improve chart analysis and verify permissions and primary flows.
+- [x] Give more evidence-backed UP/DOWN signals while retaining WAIT for unreadable or conflicting charts; live invalid-image check passed.
+- [x] Connect approved accounts to Telegram screenshot analysis; public webhook registered, authenticated link and approval/revocation tests passed.
+- [ ] Verify a real screenshot sent through Telegram (requires the user to open their account link and send a chart; no user Telegram session available).
+- [x] Rename app GHOST TRADER AI.
+- [x] Add signup, login, recovery and owner approval controls.
+- [x] Protect app and AI calls against unapproved users.
+- [x] Improve chart analysis and verify permissions and primary flows.
