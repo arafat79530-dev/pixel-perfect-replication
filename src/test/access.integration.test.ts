@@ -73,4 +73,22 @@ describe.skipIf(!url || !key || !publishable)('Live approval permissions', () =>
   it('owner cannot revoke an admin account', async () => {
     expect((await owner.rpc('decide_access', { target_user: ids[1] ?? '', new_status: 'revoked' })).error?.message).toContain('Owner access cannot be changed');
   });
+  it('admin panel lists members with telegram status; members get nothing', async () => {
+    const ownerList = await owner.rpc('admin_members');
+    expect(ownerList.error).toBeNull();
+    const row = ownerList.data?.find((r) => r.user_id === ids[0]);
+    expect(row?.status).toBe('rejected');
+    expect(row?.telegram_linked).toBe(true);
+    const memberList = await member.rpc('admin_members');
+    expect(memberList.error).toBeNull();
+    expect(memberList.data).toHaveLength(0);
+  });
+  it('only the owner can pause and resume AI access', async () => {
+    expect((await member.rpc('set_ai_pause', { paused: true, message: 'x' })).error?.message).toContain('Forbidden');
+    expect((await owner.rpc('set_ai_pause', { paused: true, message: 'Paused for test' })).error).toBeNull();
+    const paused = await owner.rpc('get_ai_pause');
+    expect(paused.data?.[0]?.message).toBe('Paused for test');
+    expect((await owner.rpc('set_ai_pause', { paused: false })).error).toBeNull();
+    expect((await owner.rpc('get_ai_pause')).data).toHaveLength(0);
+  });
 });

@@ -146,10 +146,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_members: {
+        Args: never
+        Returns: {
+          created_at: string
+          display_name: string
+          email: string
+          status: string
+          telegram_linked: boolean
+          user_id: string
+        }[]
+      }
       can_use_app: { Args: never; Returns: boolean }
       decide_access: {
         Args: { new_status: string; target_user: string }
         Returns: undefined
+      }
+      get_ai_pause: {
+        Args: never
+        Returns: {
+          message: string
+          paused: boolean
+        }[]
       }
       has_role: {
         Args: {
@@ -157,6 +175,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      set_ai_pause: {
+        Args: { message?: string; paused: boolean }
+        Returns: undefined
       }
       telegram_allowed: { Args: { target_chat: number }; Returns: boolean }
       telegram_bind: {
