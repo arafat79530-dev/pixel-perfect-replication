@@ -48,7 +48,7 @@ function App() {
         <div className="flex items-center gap-2"><div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary font-black text-primary-foreground">1M</div>
           <div><h1 className="text-lg font-bold leading-tight">GHOST TRADER <span className="text-primary">AI</span></h1><p className="text-xs text-muted-foreground">{t("Quotex 1-Minute Suite", "কিউটেক্স ১-মিনিট স্যুট")}</p></div></div>
         <div className="flex flex-wrap items-center justify-end gap-2">
-          {isAdmin && <Button variant="outline" size="sm" asChild><Link to="/members">{t("Permissions", "অনুমতি")}</Link></Button>}
+          {isAdmin && <Button variant="outline" size="sm" asChild><Link to="/members">{t("Admin Panel", "অ্যাডমিন প্যানেল")}</Link></Button>}
           <SignOutButton />
           <button onClick={() => setSound(!sound)} aria-label="sound" className="glass p-2">{sound ? <Volume2 className="h-4 w-4 text-primary" /> : <VolumeX className="h-4 w-4 text-muted-foreground" />}</button>
           <div className="glass flex p-0.5 text-xs font-semibold">
