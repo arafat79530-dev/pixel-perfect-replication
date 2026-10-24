@@ -15,6 +15,13 @@
       "when": 1792767221287,
       "tag": "0001_telegram_approved_links",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792816660787,
+      "tag": "0002_admin_panel_controls",
+      "breakpoints": true
     }
   ]
 }
