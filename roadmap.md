@@ -1,4 +1,5 @@
 # Tasks
+- [ ] Reduce screenshot analysis latency for app and Telegram; measure a live request against the 30-second target without promising guaranteed latency.
 - [x] Give more evidence-backed UP/DOWN signals while retaining WAIT for unreadable or conflicting charts; live invalid-image check passed.
 - [x] Connect approved accounts to Telegram screenshot analysis; public webhook registered, authenticated link and approval/revocation tests passed.
 - [ ] Verify a real screenshot sent through Telegram (requires the user to open their account link and send a chart; no user Telegram session available).
