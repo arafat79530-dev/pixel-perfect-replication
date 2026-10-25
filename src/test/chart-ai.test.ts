@@ -10,7 +10,7 @@ afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
 it('uses lighter reasoning for shared screenshot analysis without switching models', async () => {
   vi.stubEnv('LOVABLE_API_KEY', 'test-key');
   const result = { signal: 'CALL', confidence: 65, pair: 'Unknown', patterns: [], reasoning_en: '', reasoning_bn: '', entry_tip_en: '', entry_tip_bn: '', risk: 'high' };
-  const request = vi.fn(async () => new Response(`data: ${JSON.stringify({ type: 'response.output_text.delta', delta: JSON.stringify(result) })}\n\n`));
+  const request = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response(`data: ${JSON.stringify({ type: 'response.output_text.delta', delta: JSON.stringify(result) })}\n\n`));
   vi.stubGlobal('fetch', request);
   expect((await analyzeImage('data:image/png;base64,dGVzdA==')).signal).toBe('CALL');
   const init = request.mock.calls[0]?.[1] as RequestInit | undefined;
